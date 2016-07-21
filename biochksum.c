@@ -5,13 +5,13 @@
 
 void print_chksum(unsigned char chksum[]){
     for(int i = 0; i < SIZE; i++){
-        printf("%x ", chksum[i]);
+        printf("%d ", chksum[i]);
     }
     printf("\n");
 }
 
 int main(int argc, char * argv[]){
-    FILE * fasta = fopen("sample-data/proteins.faa", "r");
+    FILE * fasta = fopen("sample-data/a1.faa", "r");
 
     unsigned char chksum[] = {0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -33,12 +33,12 @@ int main(int argc, char * argv[]){
                 c += 32;
             }
             if(c >= 'a' && c <= 'z'){
-                c = (c - 97) * (256.0 / 26);
+                c = (c - 96) * (256.0 / 26);
                 for(size_t j = 0; j < 8; j++){
-                    j = (j + pos) % 8;
-                    chksum[j] += ((128 >> j) & c);
+                    chksum[(j + pos) % 8] += ((128 >> j) & c) | ((c+j) % 8);
+                    chksum[(j + pos + 2) % 8] += ((128 >> j) & c) | (((c+j) % 4 << 3));
+                    chksum[(j + pos + 4) % 8] += ((128 >> j) & c) | (((c+j) % 8 << 5));
                 }
-                /* print_chksum(chksum); */
                 pos++;
             }
         }
@@ -46,6 +46,7 @@ int main(int argc, char * argv[]){
     free(line);
     fclose(fasta);
 
+    print_chksum(chksum);
 
     return EXIT_SUCCESS;
 }
